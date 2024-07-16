@@ -1,0 +1,82 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages  Json?
+  patient   Patient? @relation(fields: [patientId], references: [id])
+  patientId String?
+  doctor    Doctor?  @relation(fields: [doctorId], references: [id])
+  doctorId  String?
+}
+
+model Patient {
+  id            String         @id @default(cuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  fullName      String?
+  email         String?
+  phoneNumber   String?
+  dateOfBirth   DateTime?
+  conversations Conversation[]
+  appointments  Appointment[]
+}
+
+model Appointment {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  appointmentDate DateTime?
+  reasonForVisit  String?
+  doctor          Doctor?   @relation(fields: [doctorId], references: [id])
+  doctorId        String?
+  clinic          Clinic?   @relation(fields: [clinicId], references: [id])
+  clinicId        String?
+  patient         Patient?  @relation(fields: [patientId], references: [id])
+  patientId       String?
+}
+
+model Clinic {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  name         String?
+  location     String?
+  phoneNumber  String?
+  appointments Appointment[]
+  doctors      Doctor[]
+}
+
+model Doctor {
+  id             String         @id @default(cuid())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  fullName       String?
+  specialization String?
+  email          String?
+  phoneNumber    String?
+  appointments   Appointment[]
+  clinic         Clinic?        @relation(fields: [clinicId], references: [id])
+  clinicId       String?
+  conversations  Conversation[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  firstName String?
+  lastName  String?
+  username  String   @unique
+  email     String?  @unique
+  password  String
+  roles     Json
+}
